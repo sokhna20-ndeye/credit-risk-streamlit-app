@@ -1,10 +1,13 @@
 import streamlit as st
-from utils.model_loader import predict_single
+from utils.model_loader import (
+    predict_single,
+    ModeleIntrouvableError,
+    CategorieInconnueError,
+)
 from utils.history import add_prediction
 
 st.set_page_config(page_title="Prédiction", page_icon="🔮", layout="wide")
 
-# ⚠️ À VÉRIFIER avec tes propres données (df |> distinct(...) en R) avant la démo
 OPTIONS_HOME_OWNERSHIP = ["RENT", "MORTGAGE", "OWN", "OTHER"]
 OPTIONS_LOAN_INTENT = [
     "PERSONAL", "EDUCATION", "MEDICAL", "VENTURE",
@@ -54,8 +57,25 @@ if submit:
         "cb_person_cred_hist_length": int(cb_person_cred_hist_length),
     }
 
-    with st.spinner("Le modèle analyse le dossier..."):
-        prediction, proba_ok, proba_defaut = predict_single(input_dict)
+    try:
+        with st.spinner("Le modèle analyse le dossier..."):
+            prediction, proba_ok, proba_defaut = predict_single(input_dict)
+    except ModeleIntrouvableError:
+        st.error(
+            "❌ Le modèle est introuvable. Vérifie que le dossier "
+            "'modele_credit_risk_spark' est bien présent à la racine du projet."
+        )
+        st.stop()
+    except CategorieInconnueError as e:
+        st.error(f"❌ {e}")
+        st.stop()
+    except Exception as e:
+        st.error(
+            "❌ Une erreur inattendue est survenue pendant la prédiction."
+        )
+        with st.expander("Détails techniques (pour le débogage)"):
+            st.code(str(e))
+        st.stop()
 
     add_prediction(input_dict, prediction, proba_defaut)
 
@@ -63,7 +83,7 @@ if submit:
 
     if prediction == 0:
         st.success("## 🎉👏 Cette personne est en règle !")
-        st.balloons()
+        st.toast("👏 Client en règle — dossier validé", icon="👏")
         st.markdown(
             f"""
             <div style="background-color:#e6f4ea;padding:20px;border-radius:10px;border:2px solid #34a853;">

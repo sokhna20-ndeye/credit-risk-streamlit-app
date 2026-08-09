@@ -1,2 +1,4 @@
 horodatage,person_age,person_income,person_home_ownership,person_emp_length,loan_intent,loan_int_rate,cb_person_default_on_file,loan_amnt,cb_person_cred_hist_length,prediction,statut,proba_defaut
 2026-08-08 23:01:34,35,55000.0,RENT,5.0,EDUCATION,10.5,N,15000.0,8,0,En règle,0.3347
+2026-08-09 00:25:02,30,50000.0,RENT,5.0,PERSONAL,11.0,N,10000.0,5,0,En règle,0.1104
+2026-08-09 00:28:37,30,50000.0,RENT,5.0,PERSONAL,11.0,N,10000.0,5,0,En règle,0.1104
