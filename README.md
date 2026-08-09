@@ -136,7 +136,23 @@ Pipeline Spark ML :
 Jeu de données : [Credit Risk Dataset](https://www.kaggle.com/datasets/laotse/credit-risk-dataset),
 26 013 observations d'entraînement, 6 568 observations de test.
 
+## 🔒 Confidentialité des données
+
+Cette application enregistre localement (fichier `data/predictions_history.csv`)
+les informations saisies pour chaque analyse effectuée : âge, revenu,
+situation professionnelle et de logement, informations sur le prêt demandé.
+Aucune donnée directement identifiante (nom, adresse, numéro de compte...)
+n'est collectée.
+
+Ces données restent **uniquement sur la machine où l'application est
+exécutée** — aucune transmission à un service externe. Le bouton
+"Réinitialiser l'historique" (page Tableau de bord) permet de les effacer à
+tout moment.
+
+Ce projet est réalisé à des fins académiques de démonstration ; il n'est pas
+destiné à traiter de véritables données clients en production.
+
 ## 👤 Auteur
 
-Projet réalisé dans le cadre du cursus Statistique et Informatique
-Décisionnelle — EMIA, Dakar.
+**Sokhna B. DIAGNE**
+Licence 3 — Statistique et Informatique Décisionnelle, EMIA, Dakar
