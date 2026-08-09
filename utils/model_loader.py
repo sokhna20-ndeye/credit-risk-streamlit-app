@@ -16,9 +16,6 @@ from pyspark.ml.functions import vector_to_array
 
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "modele_credit_risk_spark")
 
-# Catégories connues par le pipeline (vues à l'entraînement). Si une valeur
-# saisie n'en fait pas partie, on préfère avertir clairement l'utilisateur
-# plutôt que de laisser Spark planter avec une erreur Java illisible.
 CATEGORIES_CONNUES = {
     "person_home_ownership": ["RENT", "MORTGAGE", "OWN", "OTHER"],
     "loan_intent": [
@@ -41,13 +38,17 @@ class CategorieInconnueError(Exception):
 
 @st.cache_resource(show_spinner=False)
 def get_spark_session():
-    """Crée (une seule fois, mise en cache) une session Spark locale."""
+    """Crée (une seule fois, mise en cache) une session Spark locale,
+    avec une configuration mémoire réduite au minimum pour tenir dans
+    les ~1 Go de RAM du tier gratuit de Streamlit Community Cloud."""
     spark = (
         SparkSession.builder
         .appName("credit_risk_streamlit")
-        .master("local[*]")
-        .config("spark.driver.memory", "2g")
-        .config("spark.sql.shuffle.partitions", "4")
+        .master("local[1]")
+        .config("spark.driver.memory", "512m")
+        .config("spark.executor.memory", "512m")
+        .config("spark.sql.shuffle.partitions", "1")
+        .config("spark.ui.enabled", "false")
         .config("spark.ui.showConsoleProgress", "false")
         .getOrCreate()
     )
