@@ -2,12 +2,14 @@ import json
 import os
 import streamlit as st
 import pandas as pd
+import plotly.express as px
+from utils.ui import apply_custom_style, render_header, render_footer
 
 st.set_page_config(page_title="À propos du modèle", page_icon="ℹ️", layout="wide")
+apply_custom_style()
+render_header("À propos du modèle", "Méthodologie, hyperparamètres et performance", icon="ℹ️")
 
 METRICS_PATH = os.path.join(os.path.dirname(__file__), "..", "metrics_modele.json")
-
-st.title("ℹ️ À propos du modèle")
 
 if not os.path.exists(METRICS_PATH):
     st.warning(
@@ -19,7 +21,6 @@ if not os.path.exists(METRICS_PATH):
 with open(METRICS_PATH, "r", encoding="utf-8") as f:
     infos = json.load(f)
 
-# --- Indicateurs de performance ------------------------------------------
 st.subheader("📈 Performance sur le jeu de test")
 
 col1, col2, col3, col4 = st.columns(4)
@@ -31,13 +32,11 @@ col4.metric("Rappel", f"{infos['recall']:.4f}")
 st.caption(
     f"Évalué sur {infos['nb_observations_test']:,} observations de test "
     f"(après entraînement sur {infos['nb_observations_train']:,} observations), "
-    f"séparation 80/20."
-    .replace(",", " ")
+    f"séparation 80/20.".replace(",", " ")
 )
 
 st.divider()
 
-# --- Méthodologie -----------------------------------------------------------
 st.subheader("🧪 Méthodologie")
 
 st.markdown(
@@ -62,7 +61,6 @@ avec recherche sur grille des hyperparamètres suivants :
 
 st.divider()
 
-# --- Meilleurs hyperparamètres retenus --------------------------------------
 st.subheader("🏆 Meilleurs hyperparamètres retenus (validation croisée)")
 
 hp = infos["meilleurs_hyperparametres"]
@@ -76,7 +74,6 @@ st.table(hp_df)
 
 st.divider()
 
-# --- Variables utilisées -----------------------------------------------------
 st.subheader("🧬 Variables utilisées par le modèle")
 
 col_features, col_target = st.columns([2, 1])
@@ -93,3 +90,37 @@ st.caption(
     "(voir le notebook R d'entraînement) ; l'application se limite au "
     "déploiement, à l'interface et au suivi des prédictions."
 )
+
+st.divider()
+
+st.subheader("🧬 Importance des variables")
+st.caption(
+    "Contribution de chaque variable aux décisions du modèle (calculée "
+    "directement à partir du Random Forest entraîné, via "
+    "ml_feature_importances)."
+)
+
+IMPORTANCES_PATH = os.path.join(os.path.dirname(__file__), "..", "importances_variables.json")
+
+if os.path.exists(IMPORTANCES_PATH):
+    with open(IMPORTANCES_PATH, "r", encoding="utf-8") as f:
+        importances = json.load(f)
+
+    df_imp = pd.DataFrame(importances).sort_values("importance", ascending=True)
+
+    fig_imp = px.bar(
+        df_imp, x="importance", y="variable", orientation="h",
+        labels={"importance": "Importance relative", "variable": ""},
+        text="importance",
+    )
+    fig_imp.update_traces(
+        marker_color="#2E86C1",
+        texttemplate="%{text:.1%}",
+        textposition="outside",
+    )
+    fig_imp.update_layout(margin=dict(t=10, b=10, l=10, r=10))
+    st.plotly_chart(fig_imp, use_container_width=True)
+else:
+    st.info("Fichier 'importances_variables.json' introuvable à la racine du projet.")
+
+render_footer()

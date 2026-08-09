@@ -5,8 +5,12 @@ from utils.model_loader import (
     CategorieInconnueError,
 )
 from utils.history import add_prediction
+from utils.insights import generer_observations
+from utils.ui import apply_custom_style, render_header, render_footer
 
 st.set_page_config(page_title="Prédiction", page_icon="🔮", layout="wide")
+apply_custom_style()
+render_header("Prédiction du statut de paiement", "Saisis les informations d'une personne pour évaluer son dossier", icon="🔮")
 
 OPTIONS_HOME_OWNERSHIP = ["RENT", "MORTGAGE", "OWN", "OTHER"]
 OPTIONS_LOAN_INTENT = [
@@ -15,8 +19,11 @@ OPTIONS_LOAN_INTENT = [
 ]
 OPTIONS_DEFAULT_ON_FILE = ["N", "Y"]
 
-st.title("🔮 Prédiction du statut de paiement")
-st.write("Renseigne les informations de la personne, puis clique sur **Prédire**.")
+COULEURS_REMARQUE = {
+    "warning": ("#fff8e1", "#8a6d00", "#f0c14b", "⚠️"),
+    "info": ("#e8f0fe", "#1a3d7c", "#a7c4f2", "ℹ️"),
+    "ok": ("#e6f4ea", "#1e7e34", "#8fd19e", "✅"),
+}
 
 with st.form("formulaire_prediction"):
     col1, col2, col3 = st.columns(3)
@@ -42,7 +49,7 @@ with st.form("formulaire_prediction"):
         )
         cb_person_cred_hist_length = st.number_input("Ancienneté du dossier de crédit (années)", min_value=0, max_value=60, value=5, step=1)
 
-    submit = st.form_submit_button("🔍 Prédire", use_container_width=True)
+    submit = st.form_submit_button("🔎 Lancer l'analyse", use_container_width=True)
 
 if submit:
     input_dict = {
@@ -70,9 +77,7 @@ if submit:
         st.error(f"❌ {e}")
         st.stop()
     except Exception as e:
-        st.error(
-            "❌ Une erreur inattendue est survenue pendant la prédiction."
-        )
+        st.error("❌ Une erreur inattendue est survenue pendant la prédiction.")
         with st.expander("Détails techniques (pour le débogage)"):
             st.code(str(e))
         st.stop()
@@ -88,7 +93,7 @@ if submit:
             f"""
             <div style="background-color:#e6f4ea;padding:20px;border-radius:10px;border:2px solid #34a853;">
                 <h3 style="color:#1e7e34;margin:0;">✅ Profil sans risque particulier détecté</h3>
-                <p style="margin:5px 0 0 0;">Probabilité d'être en règle : <b>{proba_ok*100:.1f}%</b></p>
+                <p style="margin:5px 0 0 0;color:#1e7e34;">Probabilité d'être en règle : <b>{proba_ok*100:.1f}%</b></p>
             </div>
             """,
             unsafe_allow_html=True,
@@ -99,10 +104,32 @@ if submit:
             f"""
             <div style="background-color:#fce8e6;padding:20px;border-radius:10px;border:2px solid #d93025;">
                 <h3 style="color:#a50e0e;margin:0;">🚨 Risque de défaut détecté</h3>
-                <p style="margin:5px 0 0 0;">Niveau de risque de défaut : <b>{proba_defaut*100:.1f}%</b></p>
+                <p style="margin:5px 0 0 0;color:#a50e0e;">Niveau de risque de défaut : <b>{proba_defaut*100:.1f}%</b></p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    st.write("")
+    st.subheader("📝 Points d'attention sur le profil")
+    st.caption(
+        "Observations sur les données saisies (indépendantes du modèle), "
+        "pour aider à la lecture du dossier."
+    )
+
+    for niveau, texte in generer_observations(input_dict):
+        bg, text_color, border, icon = COULEURS_REMARQUE[niveau]
+        st.markdown(
+            f"""
+            <div style="background-color:{bg};color:{text_color};
+                        border-left:4px solid {border};
+                        padding:10px 14px;border-radius:6px;margin-bottom:8px;">
+                {icon} {texte}
             </div>
             """,
             unsafe_allow_html=True,
         )
 
     st.caption("Cette prédiction vient d'être ajoutée à l'historique visible dans le 📊 Tableau de bord.")
+
+render_footer()

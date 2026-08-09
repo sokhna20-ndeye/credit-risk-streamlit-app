@@ -1,4 +1,5 @@
-streamlit>=1.30
+streamlit>=1.32
 pyspark==3.0.3
 pandas>=2.0
 plotly>=5.18
+fpdf2>=2.7

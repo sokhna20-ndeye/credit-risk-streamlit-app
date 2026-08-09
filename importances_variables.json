@@ -1,0 +1,38 @@
+[
+  {
+    "variable": "person_income",
+    "importance": 0.2795
+  },
+  {
+    "variable": "loan_int_rate",
+    "importance": 0.2267
+  },
+  {
+    "variable": "loan_amnt",
+    "importance": 0.1711
+  },
+  {
+    "variable": "person_home_ownership",
+    "importance": 0.1437
+  },
+  {
+    "variable": "loan_intent",
+    "importance": 0.0715
+  },
+  {
+    "variable": "person_emp_length",
+    "importance": 0.0361
+  },
+  {
+    "variable": "cb_person_default_on_file",
+    "importance": 0.0321
+  },
+  {
+    "variable": "person_age",
+    "importance": 0.0228
+  },
+  {
+    "variable": "cb_person_cred_hist_length",
+    "importance": 0.0165
+  }
+]
