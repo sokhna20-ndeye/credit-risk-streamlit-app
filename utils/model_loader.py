@@ -9,10 +9,17 @@ comme le ferait ml_predict() côté R.
 """
 
 import os
+import sys
 import streamlit as st
 from pyspark.sql import SparkSession
 from pyspark.ml.tuning import CrossValidatorModel
 from pyspark.ml.functions import vector_to_array
+
+# Indique à Spark d'utiliser le même exécutable Python que celui du venv
+# actuel pour ses workers (nécessaire sous Windows, où il n'existe pas
+# d'exécutable nommé "python3" par défaut).
+os.environ["PYSPARK_PYTHON"] = sys.executable
+os.environ["PYSPARK_DRIVER_PYTHON"] = sys.executable
 
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "modele_credit_risk_spark")
 
